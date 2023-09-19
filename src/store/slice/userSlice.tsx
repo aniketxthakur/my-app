@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // create
-export const fetchData = createAsyncThunk("user/addUser", async (data, { rejectWithValue }) => {
+export const fetchData: any = createAsyncThunk<any>("user/addUser", async (data, { rejectWithValue }) => {
   try {
     const response = await axios.post("https://650426c5c8869921ae249820.mockapi.io/hi/crud", data)
     return response.data;
@@ -12,7 +12,7 @@ export const fetchData = createAsyncThunk("user/addUser", async (data, { rejectW
   }
 })
 //read
-export const readData = createAsyncThunk("user/readData", async (_, { rejectWithValue }) => {
+export const readData: any = createAsyncThunk<any>("user/readData", async (_, { rejectWithValue }) => {
   try {
     const response = await axios.get("https://650426c5c8869921ae249820.mockapi.io/hi/crud")
     return response.data
@@ -22,9 +22,19 @@ export const readData = createAsyncThunk("user/readData", async (_, { rejectWith
   }
 })
 //delete
-export const deleteData = createAsyncThunk('user/deleteData', async (id, { rejectWithValue }) => {
+export const deleteData: any = createAsyncThunk<any>('user/deleteData', async (id, { rejectWithValue }) => {
   try {
     const response = await axios.delete(`https://650426c5c8869921ae249820.mockapi.io/hi/crud/${id}`)
+    return response.data;
+  } catch (error) {
+    console.error("readData Error:", error);
+    throw error;
+  }
+})
+
+export const putData: any = createAsyncThunk<any>("user/putData", async (data, { rejectWithValue }) => {
+  try {
+    const response = await axios.put(`https://650426c5c8869921ae249820.mockapi.io/hi/crud/${data.id}`,data)
     return response.data;
   } catch (error) {
     console.error("readData Error:", error);
@@ -55,14 +65,14 @@ export const userSlice = createSlice({
         state.error = action.error.message
       })
       //Read
-      .addCase(readData.pending,(state:any)=>{
+      .addCase(readData.pending, (state: any) => {
         state.loading = true;
       })
-      .addCase(readData.fulfilled,(state:any , action:any)=>{
+      .addCase(readData.fulfilled, (state: any, action: any) => {
         state.loading = false;
         state.users = action.payload;
       })
-      .addCase(readData.rejected,(state:any , action:any)=>{
+      .addCase(readData.rejected, (state: any, action: any) => {
         state.loading = false;
         state.error = action.error.message;
       })
@@ -80,6 +90,19 @@ export const userSlice = createSlice({
       .addCase(deleteData.rejected, (state: any, action: any) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+      //update
+      .addCase(putData.pending, (state: any) => {
+        state.loading = true;
+      })
+      .addCase(putData.fulfilled, (state: any, action: any) => {
+        state.loading = false;
+        state.users = state.users.map((e:any)=>
+        e.id ===action.payload.id ? action.payload : e)
+      })
+      .addCase(putData.rejected, (state: any, action: any) => {
+        state.loading = false;
+        state.error = action.error.message
       })
   }
 })
